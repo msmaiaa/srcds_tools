@@ -1,7 +1,7 @@
 pub mod app_wrapper;
 pub mod ui;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub enum Game {
     CSGO,
 }
@@ -23,7 +23,7 @@ impl Game {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Openable {
     path: String,
     label: String,
@@ -50,7 +50,7 @@ impl Openable {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct ServerDirectory {
     pub game: Game,
     pub dir_root: Openable,

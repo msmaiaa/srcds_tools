@@ -9,6 +9,6 @@ fn main() {
     eframe::run_native(
         "srcds tools",
         options,
-        Box::new(|_cc| Box::new(AppWrapper::default())),
+        Box::new(|_cc| Box::new(AppWrapper::new(_cc))),
     );
 }
