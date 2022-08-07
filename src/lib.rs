@@ -1,4 +1,7 @@
-#[derive(Debug)]
+pub mod app_wrapper;
+pub mod ui;
+
+#[derive(Debug, Clone)]
 pub enum Game {
     CSGO,
 }
@@ -20,16 +23,44 @@ impl Game {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
+pub struct Openable {
+    path: String,
+    label: String,
+}
+
+impl Openable {
+    pub fn new(path: String, label: &str) -> Self {
+        Self {
+            path,
+            label: label.to_string(),
+        }
+    }
+
+    pub fn open(&self) -> Result<(), std::io::Error> {
+        open::that(&self.path)
+    }
+
+    pub fn label(&self) -> &str {
+        &self.label
+    }
+
+    pub fn path(&self) -> &str {
+        &self.path
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct ServerDirectory {
     pub game: Game,
-    pub dir_root: String,
-    pub dir_sourcemod: String,
-    pub dir_sourcemod_configs: String,
-    pub dir_sourcepython: String,
-    pub dir_cfg: String,
-    pub file_autoexec: String,
-    pub file_servercfg: String,
+    pub dir_root: Openable,
+    pub dir_sourcemod: Openable,
+    pub dir_sourcemod_configs: Openable,
+    pub dir_sourcepython: Openable,
+    pub dir_cfg: Openable,
+    pub file_autoexec: Openable,
+    pub file_servercfg: Openable,
+    pub file_databases: Openable,
 }
 
 impl ServerDirectory {
@@ -39,14 +70,39 @@ impl ServerDirectory {
         let game_dir = format!("{}\\{}", dir, game_str);
         Ok(Self {
             game: found_game,
-            dir_root: dir.to_string(),
-            dir_sourcemod: format!("{}\\addons\\sourcemod", game_dir),
-            dir_sourcemod_configs: format!("{}\\addons\\sourcemod\\configs", game_dir),
-            dir_sourcepython: format!("{}\\addons\\sourcepython", game_dir),
-            dir_cfg: format!("{}\\cfg", game_dir),
-            file_autoexec: format!("{}\\cfg\\autoexec.cfg", game_dir),
-            file_servercfg: format!("{}\\cfg\\server.cfg", game_dir),
+            dir_root: Openable::new(dir.to_string(), "Root"),
+            dir_sourcemod: Openable::new(format!("{}\\addons\\sourcemod", &game_dir), "SourceMod"),
+            dir_sourcemod_configs: Openable::new(
+                format!("{}\\addons\\sourcemod\\configs", &game_dir),
+                "Sourcemod configs",
+            ),
+            dir_sourcepython: Openable::new(
+                format!("{}\\addons\\sourcepython", &game_dir),
+                "SourcePython",
+            ),
+            dir_cfg: Openable::new(format!("{}\\cfg", &game_dir), "Cfg"),
+            file_autoexec: Openable::new(
+                format!("{}\\cfg\\autoexec.cfg", &game_dir),
+                "autoexec.cfg",
+            ),
+            file_servercfg: Openable::new(format!("{}\\cfg\\server.cfg", &game_dir), "server.cfg"),
+            file_databases: Openable::new(
+                format!("{}\\addons\\sourcemod\\configs\\databases.cfg", &game_dir),
+                "databases.cfg",
+            ),
         })
+    }
+    pub fn openables(&self) -> Vec<&Openable> {
+        vec![
+            &self.dir_root,
+            &self.dir_sourcemod,
+            &self.dir_sourcemod_configs,
+            &self.dir_sourcepython,
+            &self.dir_cfg,
+            &self.file_autoexec,
+            &self.file_servercfg,
+            &self.file_databases,
+        ]
     }
 }
 
