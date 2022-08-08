@@ -13,12 +13,14 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
+          profile: minimal
+          override: true
       - uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --release --all-features
+          args: --release --all-features --out-dir output
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            "src/target/release/srcds_tools.exe"
+            "output/srcds_tools"
