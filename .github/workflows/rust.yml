@@ -18,9 +18,9 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --release --all-features --out-dir output
+          args: --release --all-features
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            "output/srcds_tools"
+            "src/target/release/srcds_tools.exe"
