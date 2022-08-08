@@ -1,7 +1,10 @@
-use eframe::egui;
 use eframe::egui::Context;
+use eframe::egui::{self, style::Margin};
 
-use crate::app_wrapper::{AppWrapper, Tab};
+use crate::{
+    app_wrapper::{AppWrapper, Tab},
+    OpenableKind,
+};
 
 pub struct Ui {}
 
@@ -31,15 +34,47 @@ impl Ui {
 }
 
 fn render_main_tab(app: &mut AppWrapper, ctx: &Context, ui: &mut eframe::egui::Ui) {
-    ui.horizontal(|ui| {
-        if let Some(dir) = &app.state.server_directory {
-            for openable in dir.openables() {
-                if ui.button(openable.label()).clicked() {
-                    // TODO: handle this properly
-                    openable.open().unwrap();
-                }
-            }
+    let dir = match app.state.server_directory.as_ref() {
+        Some(dir) => dir,
+        None => return,
+    };
+
+    let mut folders = Vec::new();
+    let mut files = Vec::new();
+    for openable in dir.openables() {
+        match openable.kind {
+            OpenableKind::File => files.push(openable),
+            OpenableKind::Folder => folders.push(openable),
         }
+    }
+
+    //add padding on the ui
+    //ui.spacing_mut().item_spacing = egui::vec2(10., 10.);
+
+    ui.horizontal(|ui| {
+        ui.vertical(|ui| {
+            ui.heading("Folders");
+            ui.add_space(10.0);
+            for folder in folders.iter() {
+                if ui.button(folder.label()).clicked() {
+                    // TODO: handle this properly
+                    folder.open().unwrap();
+                }
+                ui.add_space(2.);
+            }
+        });
+        ui.add_space(15.0);
+        ui.vertical(|ui| {
+            ui.heading("Files");
+            ui.add_space(10.0);
+            for file in files.iter() {
+                if ui.button(file.label()).clicked() {
+                    // TODO: handle this properly
+                    file.open().unwrap();
+                }
+                ui.add_space(2.);
+            }
+        });
     });
 }
 

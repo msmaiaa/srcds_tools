@@ -23,17 +23,24 @@ impl Game {
     }
 }
 
+#[derive(serde::Deserialize, serde::Serialize, Debug, Clone)]
+pub enum OpenableKind {
+    File,
+    Folder,
+}
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Openable {
     path: String,
     label: String,
+    kind: OpenableKind,
 }
 
 impl Openable {
-    pub fn new(path: String, label: &str) -> Self {
+    pub fn new(path: String, label: &str, kind: OpenableKind) -> Self {
         Self {
             path,
             label: label.to_string(),
+            kind,
         }
     }
 
@@ -65,30 +72,43 @@ pub struct ServerDirectory {
 
 impl ServerDirectory {
     pub fn new(dir: &str) -> Result<Self, String> {
+        use OpenableKind::*;
         let found_game = find_game_from_root_dir(dir)?;
         let game_str = found_game.to_str();
         let game_dir = format!("{}\\{}", dir, game_str);
         Ok(Self {
             game: found_game,
-            dir_root: Openable::new(dir.to_string(), "Root"),
-            dir_sourcemod: Openable::new(format!("{}\\addons\\sourcemod", &game_dir), "SourceMod"),
+            dir_root: Openable::new(dir.to_string(), "Root", Folder),
+            dir_sourcemod: Openable::new(
+                format!("{}\\addons\\sourcemod", &game_dir),
+                "SourceMod",
+                Folder,
+            ),
             dir_sourcemod_configs: Openable::new(
                 format!("{}\\addons\\sourcemod\\configs", &game_dir),
                 "Sourcemod configs",
+                Folder,
             ),
             dir_sourcepython: Openable::new(
                 format!("{}\\addons\\sourcepython", &game_dir),
                 "SourcePython",
+                Folder,
             ),
-            dir_cfg: Openable::new(format!("{}\\cfg", &game_dir), "Cfg"),
+            dir_cfg: Openable::new(format!("{}\\cfg", &game_dir), "Cfg", Folder),
             file_autoexec: Openable::new(
                 format!("{}\\cfg\\autoexec.cfg", &game_dir),
                 "autoexec.cfg",
+                File,
             ),
-            file_servercfg: Openable::new(format!("{}\\cfg\\server.cfg", &game_dir), "server.cfg"),
+            file_servercfg: Openable::new(
+                format!("{}\\cfg\\server.cfg", &game_dir),
+                "server.cfg",
+                File,
+            ),
             file_databases: Openable::new(
                 format!("{}\\addons\\sourcemod\\configs\\databases.cfg", &game_dir),
                 "databases.cfg",
+                File,
             ),
         })
     }
